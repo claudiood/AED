@@ -1,75 +1,43 @@
-#include <stdio.h>
-#include <stdlib.h>
-
 typedef	struct lista{
     char valor;
     struct lista *proximo, *anterior;
 }Lista;
 
 void inserir(Lista **lista, char num);
-void imprimir(Lista *lista);
-int contadorXY(Lista **lista, int *ptr1, int *ptr2, char n, char m);
+int contadorXY(Lista **lista, int *ptrx, int *ptry, char n, char m);
 
-int main(){
+int maximumGain(char *s, int x, int y) {
 
     Lista *lista = NULL;
-    int opcao, valor, resultado = 0, *ptr1, *ptr2, verificador = 0;
-    char *s = "cdbcbbaaabab", n = 'a', m = 'b';
 
-    int ponteiro1 = 0;
-    int ponteiro2 = 0;
+    int opcao, valor, resultado = 0, *ptrx, *ptry, verificador = 0, ponteirox = 0, ponteiroy = 0;
+    char n = 'a', m = 'b';
 
-    int x = 4;
-    int y = 5;
-
-    //Insere a string na lista
-    while(*s != '\0'){
+    while((*s) != '\0'){
         inserir(&lista, *s);
-        s++;
+        *s++;
     }
-    //Linka os ponteiros às variaveis para fazer incremento
-    ptr1 = &ponteiro1;
-    ptr2 = &ponteiro2;
-    
+
+    ptrx = &ponteirox;
+    ptry = &ponteiroy;
+
     do{
-        printf("\nEscolha uma opcao:\n0 - Sair\n1 - Remover AB/BA\n2 - Imprimir\n");
-        scanf("%d",&opcao);
-
-        switch(opcao){
-            case 1:
-                //Looping para removida dos elementos BA ou AB
-                do{
-                    //Testa a prioridade, caso x valha mais que Y, AB terá prioridade na retirada, caso contrário será o BA
-                    if(x > y){
-                        verificador = contadorXY(&lista, ptr1, ptr2, n, m);
-                    }
-                    else{
-                        verificador = contadorXY(&lista, ptr1, ptr2, m, n);
-                    }
-                }while(verificador);
-                break;
-            case 2:
-                imprimir(lista);
-                break;
-            default:
-                if(opcao != 0){
-                    printf("\nOpcao invalida, tente novamente!\n");
-                }
-                break;
+        if(x > y){
+            verificador = contadorXY(&lista, ptrx, ptry, n, m);
         }
-    }while(opcao != 0);
+        else{
+            verificador = contadorXY(&lista, ptrx, ptry, m, n);
+        }
+    }while(verificador);
 
-    //Testa prioridade para saber qual peso deve ser multiplicar cada variavel
     if(x > y){
-        resultado = (*ptr1*y) + (*ptr2*x);
+        resultado = (*ptrx*y) + (*ptry*x);
     }
     else{
-        resultado = (*ptr1*x) + (*ptr2*y);
+        resultado = (*ptrx*x) + (*ptry*y);
     }
-    printf("\nO resultado da soma de X e Y foi igual a: %d\n",resultado);
-    printf("\nFim do programa!\n");
 
-    return 0;
+    return resultado;
 }
 
 void inserir(Lista **lista, char num){
@@ -95,26 +63,19 @@ void inserir(Lista **lista, char num){
     }
 }
 
-void imprimir(Lista *lista){
-    printf("\n-----------------LISTA-----------------\n\n");
-    while(lista){
-        printf("%c",lista->valor);
-        lista = lista->proximo;
-    }
-    printf("\n\n--------------FIM DA LISTA-------------");
-}
-
-int contadorXY(Lista **lista, int *ptr1, int *ptr2, char n, char m){
-    Lista *remover = NULL, *item = *lista, *anterior = NULL;
+int contadorXY(Lista **lista, int *ptrx, int *ptry, char n, char m){
+    Lista *remover1 = NULL, *remover2 = NULL, *item = *lista, *anterior = NULL;
 
     if(item){
         while(item && item->proximo){
-            //Como n tem o valor 'a' e m o valor 'b' esse condicional testa se encontramos a subpalabra AB
-            if(item->valor == n && item->proximo->valor == m){
-                //Caso tenha encontrado, incrementamos o valor do ponteiro
-                (*ptr2)++;
+            int verificador = 0;
 
-                remover = item;
+            if(item->valor == n && item->proximo->valor == m){
+                (*ptry)++;
+                verificador++;
+
+                remover1 = item;
+                remover2 = item->proximo;
                 
                 if(anterior){
                     anterior->proximo = item->proximo->proximo;
@@ -123,26 +84,29 @@ int contadorXY(Lista **lista, int *ptr1, int *ptr2, char n, char m){
                     *lista = item->proximo->proximo;
                 }
                 
-                free(remover->proximo);
-                free(remover);
+                free(remover1);
+                free(remover2);
 
-                return 1;
+                return verificador;
             }
             else{
                 anterior = item;
                 item = item->proximo;
             }
         }
-        //Atribui o valor da lista ao ponteiro item para utilizar o looping novamente com o valor atualizado.
+
         item = *lista;
 
         while(item && item->proximo){
-            //Como n tem o valor 'a' e m o valor 'b' esse condicional testa se encontramos a subpalabra BA
-            if(item->valor == m && item->proximo->valor == n){
-                (*ptr1)++;
+            int verificador = 0;
 
-                remover = item;
-                
+            if(item->valor == m && item->proximo->valor == n){
+                (*ptrx)++;
+                verificador++;
+
+                remover1 = item;
+                remover2 = item->proximo;
+
                 if(anterior){
                     anterior->proximo = item->proximo->proximo;
                 }
@@ -150,10 +114,10 @@ int contadorXY(Lista **lista, int *ptr1, int *ptr2, char n, char m){
                     *lista = item->proximo->proximo;
                 }
                 
-                free(remover->proximo);
-                free(remover);
+                free(remover1);
+                free(remover2);
                 
-                return 1;
+                return verificador;
             }
             else{
                 anterior = item;
